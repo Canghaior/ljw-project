@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ljw-project
+  datasource:
+    url: jdbc:mysql://localhost:3307/my_springboot_framework?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: ljw331328
+    driver-class-name: com.mysql.cj.jdbc.Driver

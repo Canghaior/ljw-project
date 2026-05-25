@@ -19,6 +19,27 @@ public class User {
 
     private LocalDateTime createTime;
 
+    //密码 BCrypt加密
+    private String password;
+    //状态  1正常 0 禁用
+    private Integer status;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }

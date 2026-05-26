@@ -1,8 +1,14 @@
 package com.ljw.vo.user;
 
+/**
+ * 登录请求参数。
+ */
 public class LoginRequest {
 
+    // 登录用户名。
     private String username;
+
+    // 前端传来的明文密码，只用于登录校验，不直接入库。
     private String password;
 
     public String getUsername() {

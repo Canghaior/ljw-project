@@ -1,6 +1,5 @@
 package com.ljw.dispatch;
 
-import com.ljw.dao.model.User;
 import com.ljw.vo.user.LoginRequest;
 import com.ljw.vo.user.LoginResponse;
 import com.ljw.vo.user.UserInfoVO;
@@ -16,11 +15,13 @@ import java.util.List;
 public interface IUserDispatch {
 
     /**
-     * 查询全部用户。
+     * 查询用户展示列表。
      *
-     * @return 用户列表
+     * <p>这里返回 VO，不返回数据库实体，避免 Controller 泄露 password 等内部字段。</p>
+     *
+     * @return 用户展示信息列表
      */
-    List<User> findAll();
+    List<UserInfoVO> findAllUserInfo();
 
     /**
      * 用户登录。

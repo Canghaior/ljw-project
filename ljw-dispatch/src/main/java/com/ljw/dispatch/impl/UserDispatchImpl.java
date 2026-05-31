@@ -1,6 +1,5 @@
 package com.ljw.dispatch.impl;
 
-import com.ljw.dao.model.User;
 import com.ljw.dispatch.IUserDispatch;
 import com.ljw.service.service.IUserService;
 import com.ljw.vo.user.LoginRequest;
@@ -23,13 +22,13 @@ public class UserDispatchImpl implements IUserDispatch {
     }
 
     /**
-     * 查询全部用户。
+     * 查询用户展示列表。
      *
-     * @return 用户列表
+     * @return 用户展示信息列表
      */
     @Override
-    public List<User> findAll() {
-        return userService.list();
+    public List<UserInfoVO> findAllUserInfo() {
+        return userService.findAllUserInfo();
     }
 
     /**

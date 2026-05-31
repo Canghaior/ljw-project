@@ -6,6 +6,8 @@ import com.ljw.vo.user.LoginRequest;
 import com.ljw.vo.user.LoginResponse;
 import com.ljw.vo.user.UserInfoVO;
 
+import java.util.List;
+
 /**
  * 用户业务接口。
  */
@@ -26,4 +28,13 @@ public interface IUserService extends IService<User> {
      * @return 用户基本信息
      */
     UserInfoVO getUserInfo(Long userId);
+
+    /**
+     * 查询用户展示列表。
+     *
+     * <p>真实项目中接口层不直接返回 User 实体，避免 password 等数据库字段泄露。</p>
+     *
+     * @return 用户展示信息列表
+     */
+    List<UserInfoVO> findAllUserInfo();
 }

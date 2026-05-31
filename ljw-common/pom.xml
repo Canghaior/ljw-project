@@ -18,6 +18,18 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
+        <!-- Spring Security 核心包：用于 SecurityContextHolder 保存当前登录用户 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+
+        <!-- Spring 基础上下文：用于把 JwtUtil 注册成 Spring Bean，并读取配置文件 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
         <!-- JWT API -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

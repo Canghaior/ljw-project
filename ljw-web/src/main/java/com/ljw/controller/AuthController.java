@@ -1,11 +1,11 @@
 package com.ljw.controller;
 
 import com.ljw.common.Result;
+import com.ljw.common.security.SecurityUserContext;
 import com.ljw.dispatch.IUserDispatch;
 import com.ljw.vo.user.LoginRequest;
 import com.ljw.vo.user.LoginResponse;
 import com.ljw.vo.user.UserInfoVO;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,15 +43,15 @@ public class AuthController {
     /**
      * 获取当前登录用户信息。
      *
-     * <p>LoginInterceptor 会先解析 token，并把 userId 放入 request。
-     * 这里直接通过 userId 查询当前用户信息。</p>
+     * <p>JWT 过滤器会先解析 token，并把登录用户放入 Spring Security 上下文。
+     * 这里不再依赖 HttpServletRequest，避免 Web 层对象向业务层扩散。</p>
      *
-     * @param request HTTP 请求对象
      * @return 当前登录用户信息
      */
     @GetMapping("/me")
-    public Result<UserInfoVO> me(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+    public Result<UserInfoVO> me() {
+        // 从安全上下文获取当前登录用户 id，而不是从 request attribute 获取。
+        Long userId = SecurityUserContext.getUserId();
         UserInfoVO userInfo = userDispatch.getUserInfo(userId);
         return Result.success(userInfo);
     }

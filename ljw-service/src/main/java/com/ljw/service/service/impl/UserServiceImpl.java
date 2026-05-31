@@ -12,11 +12,19 @@ import com.ljw.vo.user.LoginResponse;
 import com.ljw.vo.user.UserInfoVO;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 用户业务实现类。
  */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
+
+    private final JwtUtil jwtUtil;
+
+    public UserServiceImpl(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     /**
      * 用户登录。
@@ -53,8 +61,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new BizException("用户名或密码错误");
         }
 
-        // 6. 密码正确，生成 JWT token。
-        String token = JwtUtil.createToken(user.getId(), user.getUsername());
+        // 6. 密码正确，生成 JWT token。token 中只放非敏感身份信息。
+        String token = jwtUtil.createToken(user.getId(), user.getUsername(), user.getNickname());
 
         // 7. 组装返回给前端的用户信息，不能包含 password。
         UserInfoVO userInfoVO = new UserInfoVO()
@@ -102,6 +110,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 .setId(user.getId())
                 .setUsername(user.getUsername())
                 .setNickname(user.getNickname());
+    }
+
+    /**
+     * 查询用户展示列表。
+     *
+     * <p>数据库实体 User 中包含 password、status 等内部字段，
+     * Controller 不应该直接返回实体，所以这里统一转换成 UserInfoVO。</p>
+     *
+     * @return 用户展示信息列表
+     */
+    @Override
+    public List<UserInfoVO> findAllUserInfo() {
+        return list().stream()
+                // 实体转 VO，只暴露前端允许看到的字段。
+                .map(user -> new UserInfoVO()
+                        .setId(user.getId())
+                        .setUsername(user.getUsername())
+                        .setNickname(user.getNickname()))
+                .toList();
     }
 
     /**

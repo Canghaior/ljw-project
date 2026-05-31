@@ -1,0 +1,172 @@
+一、图片信息理解
+把请求线程的信息 传递给线程池的信息 让线程池的线程去异步处理
+
+比如 用户批量导出很多数据时，如果不选择异步线程  而是一直使用请求线程（含有用户基本信息和token）去完成的这任务  那么当数据量很大的时候，用户就需要长时间无法操作其他东西。
+那么这时候可以使用异步。 比如请求完后  把请求线程的信息  传递给 线程池的线程 去完成这个任务（后台完成）， 那么用户在这个过程中还可以继续其他操作。比如后台导出大的excel文件。 如果不进行图片中红色箭头这个操作 那么线程池中的线程 可能信息为null  或则 沿用之前的信息。 所以一定要进行这一步，且执行完后要clear 清空。  若是用户请求消耗时间比较短如查找  等  则可以不需要这一步操作。直接使用请求线程一次性完成。
+
+二、什么叫 Maven 版本冲突？
+
+在java项目中，通常本质是 依赖Jar包版本冲突。也就是 在项目要中引入了多个依赖，而这些依赖又间接引入了同一个Jar的不同版本。
+例如：
+
+<dependency>
+    <groupId>A</groupId>
+    <artifactId>a</artifactId>
+    <version>1.0</version>
+</dependency>
+
+<dependency>
+    <groupId>B</groupId>
+    <artifactId>b</artifactId>
+    <version>1.0</version>
+</dependency>
+
+A依赖 commons-lang3:3.8
+B依赖 commons-lang3:3.3.12
+出现同一个Jar 但是不同版本被同时引入。Maven最终只会选一个版本放进项目classpath，但是选错版本就可能会导致运行报错。
+
+如常见报错现象：1 java.lang.NoSuchMethodError 代码运行时找不到某个方法
+原因：编译时用的是高版本jar，运行时实际加载的是低版本jar。
+
+2 java.lang.ClassNotFoundException 找不到某个类
+可能原因是 编译时有这个类，但运行时没找到 
+
+3 java.lang.NoClassDefFoundError  编译时有这个类，但运行时没找到
+常见于依赖冲突、依赖缺失、打包没带进去
+
+4 Spring Boot启动失败  可能底层原因是某些依赖版本不兼容
+
+Maven如何选择版本？
+1 、 就近原则 谁离项目近 就用谁
+如:
+我的项目
+ ├── A
+ │    └── commons-lang3:3.8
+ └── B
+      └── C
+           └── commons-lang3:3.12
+
+Commons-lang3:3.8更近所以Maven可能选择3.8
+如果路径一样近 通常会选择pom.xml中先声明的那个依赖路径
+
+怎么解决Maven版本冲突
+1 常见做法： 使用<dependencyMangement>统一版本
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+dependencyManagement 作用：本身不会真正引入 Jar。统一规定版本，真正使用的时候可以不写 version。
+
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+</dependency>
+会自动使用 dependencyManagement 里定义的 3.12.0
+
+
+2：直接在项目里指定版本
+如果某个依赖版本被 Maven 选错了，可以在 pom.xml 里直接声明正确版本
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.15.3</version>
+</dependency>
+直接依赖优先级比较高，通常可以覆盖间接依赖
+
+3 使用<exclusions> 排除冲突依赖
+如引入了 A 但是 A间接引入了一个不想要的旧版本jar，则可以通过这个排除
+
+4通过父过程 或父依赖管理  父级别一般会管理版本， 这样很多依赖自己别随便写jar版本
+
+三、AOP  全称 Aspect Oriented Programming 面向切面编程。  即把很多业务都会重复用到，但又不属于核心业务本身的逻辑，抽出来统一处理。
+也可认为 在不改变原来业务代码的情况下，给一批方法统一加上额外功能。这些额外功能不是核心业务，是公共逻辑，如：
+日志记录、接口耗时统计、权限校验、异常处理、数据权限、操作记录、参数校验、缓存处理等
+
+
+四、@Transactional  这个注解的作用是让insertRecord方法里的数据库操作处在同一事务中。方法正常结束就提交，方法抛出符合规则的异常就回滚。
+开启事务
+ ↓
+执行 verifyInsertRecord
+ ↓
+执行 buildInsertRecord
+ ↓
+执行 beforeInsertRecord
+ ↓
+执行 insert 数据库插入
+ ↓
+执行 afterInsertRecord
+ ↓
+如果全部正常：提交事务
+ ↓
+如果中途抛 Exception：回滚事务
+
+里面的常见参数：
+@Transactional(rollbackFor = Exception.class) 
+作用 指定哪些异常会导致事务回滚 （如果这里不写Exception.class） 那么普通的Exception不一定会回滚 因为Spring默认主要回滚RuntimeException \ Error
+
+@Transactional(noRollbackFor = CommonException.class)
+作用 即使抛出CommonException 也不要回滚
+
+Propagation
+作用 当前方法被另一个事务方法调用时，应该加入原事务，还是新开事务，还是不用事务。
+可选值 有REQUIRED  默认值，有事务就加入，没有就新建
+REQUIRES_NEW  总是新开一个事务，外层事务会被挂起
+SUPPORTS   有事务就加入，没有事务也能执行
+NOT_SUPPORTED  不使用事务
+MANDATORY  必须已经存在事务，否则报错
+NEVER  必须没有事务，否则报错
+NESTED   嵌套事务，依赖保存点
+
+Isolation
+作用  多个事务同时操作数据库时，彼此能看到什么程度的数据。
+默认  Isolation.DEFAULT   是用数据库自己的默认隔离级别
+常见值：
+READ_UNCOMMITTED   可以读到别人未提交的数据，风险高
+READ_COMMITTED  只能读到别人已提交的数据
+REPEATABLE_READ   同
+一个事务中多次读取结果一致 
+
+
+Timeout
+事务超时时间，单位秒。     @Transactional(timeout = 30)
+作用 这个事务最多执行 30 秒 超过时间后，事务应该回滚
+
+readOnly  只读事务 
+作用   原则上只查询 不修改数据
+
+transactionManager
+@Transactional(transactionManager = "dataTransactionManager")
+作用 当项目里有多个数据源或多个事务管理器时，用它指定具体使用哪个事务管理器
+
+什么情况下@Transactional会失效
+1、 同一个类内部方法调用，事务容易失效
+Spring AOP 是基于代理对象工作的。外部调用代理对象时，事务拦截器才有机会生效；如果在同一个类里用 this.B() 调用，就是直接调用原对象方法，绕过了代理对象。Spring 官方文档明确说明，self-invocation 不会让 advice 有机会运行。
+
+
+2、方法不是 public，可能失效  比如private protected
+
+3、类没有交给spring管理  比如
+DrugService service = new DrugService();
+service.save();
+这种情况下 spring没有机会创建代理对象，事务不会生效
+
+4 异常被自己catch掉了 没有抛出去
+解决 可以在catch中 在throw 抛异常
+
+5 抛出的异常类型不符合回滚原则
+比如 如果原图中没有rollbackFor  = Exception.calss 那么发生普通异常时可以不会回滚
+除非Runtime异常 和 error
+
+6  数据库表本身不支持事务
+比如MySQL  中， InnoDB 支持事务 但是MyISAM不支持事务
+原因如果表引擎不支持事务，Spring 注解写得再对，数据库也无法真正回滚。
+
+7 方法是final/或类是final  代理可能无法增强
+CGLIB 代理类，所以受 final、private、继承规则限制；JDK 动态代理代理接口，所以不关心目标类是不是 final，但它只能增强接口中声明的方法，不能增强类自己的普通方法、private 方法。
+
+8注解加错位置  不推荐只加在接口方法上，推荐加载是实现类方法上

@@ -10,29 +10,61 @@ import java.io.Serializable;
  */
 public class LoginUser implements Serializable {
 
-    // 当前登录用户 id，系统内部做数据归属、操作人记录时主要使用它。
+    /**
+     * 当前登录用户的数据库主键。
+     *
+     * <p>业务代码可以用它查询用户、记录操作人或判断数据归属。</p>
+     */
     private final Long userId;
 
-    // 当前登录用户名，适合用于日志、审计、页面展示等场景。
+    /**
+     * 当前登录用户的登录名。
+     *
+     * <p>适合用于日志和审计，不用于再次校验密码。</p>
+     */
     private final String username;
 
-    // 当前登录用户昵称，属于非敏感展示信息。
+    /**
+     * 当前登录用户的昵称，属于可以展示的非敏感信息。
+     */
     private final String nickname;
 
+    /**
+     * 创建一个已经通过身份认证的用户对象。
+     *
+     * @param userId 用户数据库主键
+     * @param username 登录用户名
+     * @param nickname 用户昵称
+     */
     public LoginUser(Long userId, String username, String nickname) {
         this.userId = userId;
         this.username = username;
         this.nickname = nickname;
     }
 
+    /**
+     * 获取当前用户的数据库主键。
+     *
+     * @return 用户 id
+     */
     public Long getUserId() {
         return userId;
     }
 
+    /**
+     * 获取当前用户的登录名。
+     *
+     * @return 登录用户名
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * 获取当前用户的昵称。
+     *
+     * @return 用户昵称
+     */
     public String getNickname() {
         return nickname;
     }

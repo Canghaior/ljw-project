@@ -2,7 +2,8 @@ package com.ljw.service.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ljw.common.exception.BizException;
-import com.ljw.common.util.JwtUtil;
+import com.ljw.common.security.LoginSessionManager;
+import com.ljw.common.security.LoginUser;
 import com.ljw.common.util.PasswordUtil;
 import com.ljw.dao.model.User;
 import com.ljw.service.mapper.UserMapper;
@@ -20,10 +21,20 @@ import java.util.List;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
-    private final JwtUtil jwtUtil;
+    /**
+     * 手写登录会话管理器。
+     *
+     * <p>密码校验成功后由它创建 Token，退出登录时由它删除 Token。</p>
+     */
+    private final LoginSessionManager loginSessionManager;
 
-    public UserServiceImpl(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
+    /**
+     * 创建用户业务服务。
+     *
+     * @param loginSessionManager Spring 容器中的登录会话管理器
+     */
+    public UserServiceImpl(LoginSessionManager loginSessionManager) {
+        this.loginSessionManager = loginSessionManager;
     }
 
     /**
@@ -61,8 +72,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new BizException("用户名或密码错误");
         }
 
-        // 6. 密码正确，生成 JWT token。token 中只放非敏感身份信息。
-        String token = jwtUtil.createToken(user.getId(), user.getUsername(), user.getNickname());
+        // 6. 密码正确后创建服务端登录会话，并生成安全随机 Token 返回给客户端。
+        LoginUser loginUser = new LoginUser(user.getId(), user.getUsername(), user.getNickname());
+        String token = loginSessionManager.createSession(loginUser);
 
         // 7. 组装返回给前端的用户信息，不能包含 password。
         UserInfoVO userInfoVO = new UserInfoVO()
@@ -77,6 +89,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     /**
+     * 退出登录时删除服务端保存的 Token，会话删除后该 Token 会立即失效。
+     *
+     * @param token 当前请求使用的 Token
+     */
+    @Override
+    public void logout(String token) {
+        loginSessionManager.removeSession(token);
+    }
+
+    /**
      * 根据用户 id 获取当前用户信息。
      *
      * <p>该方法主要给 /auth/me 使用。即使 token 合法，也要再次确认用户是否还存在、
@@ -87,7 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
      */
     @Override
     public UserInfoVO getUserInfo(Long userId) {
-        // 1. token 解析出的 userId 为空，说明请求上下文不正常。
+        // 1. 登录上下文中的 userId 为空，说明请求上下文不正常。
         if (userId == null) {
             throw new BizException(401, "请先登录");
         }

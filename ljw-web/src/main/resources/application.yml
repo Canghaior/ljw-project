@@ -10,8 +10,6 @@ spring:
     password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-jwt:
-  # JWT 签名密钥：开发环境可以用默认值，生产环境必须通过 JWT_SECRET 环境变量覆盖。
-  secret: ${JWT_SECRET:ljw-project-login-secret-key-please-change-32}
-  # token 有效期，单位小时。
-  expire-hours: ${JWT_EXPIRE_HOURS:24}
+login:
+  # 手写 Token 的有效期，单位小时；可以通过环境变量覆盖。
+  token-expire-hours: ${LOGIN_TOKEN_EXPIRE_HOURS:24}

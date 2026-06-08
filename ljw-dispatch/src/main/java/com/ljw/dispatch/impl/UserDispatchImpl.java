@@ -15,8 +15,18 @@ import java.util.List;
 @Component
 public class UserDispatchImpl implements IUserDispatch {
 
+    /**
+     * 用户领域业务服务。
+     *
+     * <p>Dispatch 当前只做调用转发，未来组合多个 Service 时可以在这一层编排。</p>
+     */
     private final IUserService userService;
 
+    /**
+     * 创建用户业务编排对象。
+     *
+     * @param userService 用户业务服务，由 Spring 自动注入
+     */
     public UserDispatchImpl(IUserService userService) {
         this.userService = userService;
     }
@@ -40,6 +50,16 @@ public class UserDispatchImpl implements IUserDispatch {
     @Override
     public LoginResponse login(LoginRequest request) {
         return userService.login(request);
+    }
+
+    /**
+     * 删除当前 Token 对应的服务端会话。
+     *
+     * @param token 当前请求携带的 Token
+     */
+    @Override
+    public void logout(String token) {
+        userService.logout(token);
     }
 
     /**

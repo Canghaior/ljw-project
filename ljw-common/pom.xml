@@ -18,39 +18,17 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
-        <!-- Spring Security 核心包：用于 SecurityContextHolder 保存当前登录用户 -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-        </dependency>
-
-        <!-- Spring 基础上下文：用于把 JwtUtil 注册成 Spring Bean，并读取配置文件 -->
+        <!-- Spring 基础上下文：用于注册手写的登录会话管理器并读取过期时间配置 -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
 
-        <!-- JWT API -->
+        <!-- 测试手写 Token 会话的创建、校验和退出逻辑 -->
         <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>${jjwt.version}</version>
-        </dependency>
-
-        <!-- JWT 运行时实现 -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>${jjwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- JWT JSON 处理 -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>${jjwt.version}</version>
-            <scope>runtime</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

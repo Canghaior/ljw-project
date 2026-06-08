@@ -11,8 +11,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  */
 public class PasswordUtil {
 
-    // BCrypt 每次加密同一个明文都会生成不同密文，但 matches 仍然可以正确校验。
+    /**
+     * BCrypt 密码编码器。
+     *
+     * <p>这是当前登录流程唯一保留的 Spring Security 组件，只负责密码哈希，
+     * 不参与 Token、拦截器或用户上下文处理。同一个明文每次生成的密文不同，
+     * 但 {@code matches} 仍能根据密文中的盐值完成校验。</p>
+     */
     private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
+
+    /**
+     * 工具类只提供静态方法，不允许创建实例。
+     */
+    private PasswordUtil() {
+    }
 
     /**
      * 加密明文密码。

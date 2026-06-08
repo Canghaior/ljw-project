@@ -22,6 +22,13 @@ public interface IUserService extends IService<User> {
     LoginResponse login(LoginRequest loginRequest);
 
     /**
+     * 删除当前登录会话。
+     *
+     * @param token 当前请求携带的 Token
+     */
+    void logout(String token);
+
+    /**
      * 根据用户 id 获取前端可展示的用户信息。
      *
      * @param userId 用户 id

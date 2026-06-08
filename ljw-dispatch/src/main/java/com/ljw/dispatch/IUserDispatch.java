@@ -32,6 +32,13 @@ public interface IUserDispatch {
     LoginResponse login(LoginRequest request);
 
     /**
+     * 退出当前登录会话。
+     *
+     * @param token 当前请求携带的 Token
+     */
+    void logout(String token);
+
+    /**
      * 根据用户 id 获取用户基本信息。
      *
      * @param userId 用户 id
